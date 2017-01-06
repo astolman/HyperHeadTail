@@ -1,0 +1,122 @@
+=======================================================================
+=======================================================================
+     ####      ####         ####      ####         ################
+     ####      ####         ####      ####         ################
+     ####      ####         ####      ####               ####     
+     ##############         ##############               ####
+     ##############         ##############               ####
+     ####      ####         ####      ####               ####
+     ####      ####         ####      ####               ####
+     ####      ####         ####      ####               ####
+=======================================================================
+=======================================================================
+
+TABLE OF CONTENTS:
+  1. DIRECTORY CONTENTS
+  2. USAGE
+  3. BUILD INSTRUCTIONS
+  4. DATA CONTENTS & SCRIPTS
+
+=======================================================================
+1. DIRECTORY CONTENTS
+=======================================================================
+This folder contains the source code for HHT. Below is a summary of 
+it's contents:
+-main.cpp       Implementation of function main(), handles command-
+   line options and user I/O.
+-tail_map.cpp   Implementation for St
+-tail_map.hpp   Header file to export those objects/methods
+-head_map.cpp   Implementation for Sh
+-head_map.hpp   Header file to export those objects/methods
+-Makefile       Makefile to build HHT, this is the only file that
+   a user should have to edit.
+-data/          Directory containing all the experimental data.
+-scripts/       Directory containing scripts outlined in section 4.
+-shll/          Directory containing all of the implementation for the
+   sliding HyperLogLog counters, much of it is taken from 
+   Google's HyperLogLog++ and dialtr's libcount on GitHub.
+
+=======================================================================
+2. USAGE
+=======================================================================
+NAME
+       hht - run hht algorithm on a given graph stream
+
+SYNOPSIS
+       hht [OPTION] [ARG]
+
+DESCRIPTION
+       To run hht, a number of parameters are needed. These are 
+       specified as arguments to command line options. For a full
+       description of the options available with HHT, run 
+          >$ ./hht --help
+       The most important options are as follows:
+       --input [File] 	Specify input file for graph stream. If input
+                	is not specified, HHT looks for multigraph.txt
+       --output [File]	Specify output file. If output is not specified
+                     	output is written to myoutput
+       See the --help option for info on how to set ph and pt.
+
+OUTPUT
+       The output will be printed to the specified value with the 
+       following at the beginning of each file.
+       >File : [input], length = [last timestamp read in], Head size = 
+        [number of nodes in Sh], Tail size = [num nodes in St] ph = 
+        [prob], pt = [prob]
+       For each query to HHT, the output file will contain output of 
+       the form
+       >   [Estimate|True distro], window = [window queried]
+       >      xs = [ [x-coord 1], [x-coord 2], ...]
+       >      ys = [ [y-coord 1], [y-coord 2], ...]
+       >      [dthr = [num]]
+       This last line will only appear if it is showing the ccdh for an
+       estimate and not for the true ccdh.
+
+=======================================================================
+3. BUILD INSTRUCTIONS
+=======================================================================
+DEPENDENCIES
+        HHT is written in C++ using the C++11 standard. It requires 
+        the program_options module from the C++ Boost libraries. In 
+        addition, the hash functions use the SHA-1 hash from the 
+        openssl library. This can be modified in shll/shll.cc file.
+
+        The Makefile assumes a C++17 compliant version of the g++ 
+        compiler. However, this has been compiled with clang, and minor
+        modifications to the Makefile should allow it to be built using
+        the clang compiler. 
+
+MAKEFILE MODIFICATIONS
+        The Makefile macro CXX can be changed to clang if desired. The 
+        macros CXXFLAGS and LDFLAGS assume that Boost is in 
+        ~/build/boost_1_61_0. This may need to be modified if the Boost
+        libraries are installed in a different directory.
+
+TO BUILD
+        Enter at the command prompt:
+        >$ make hht
+        This should be all that is required when all the prerequisites
+        are met. This installs the program hht in the current directory.
+
+=======================================================================
+4. DATA CONTENTS & SCRIPTS
+=======================================================================
+FORMAT
+       All of the experimental datasets are pickled DataFrames from the
+       Python pandas package. They are pickled using Python3's default
+       pickle.dump() options. Each individual query is a row in the 
+       dataset and the column names should explain the information
+       contained therein.
+
+DATASETS
+       -p_tests.pkl     Information on all 28,000+ runs on Zeta3 
+                        streams with various windows and constant ph 
+                        and pt values
+
+SCRIPTS 
+       -rhcalculator.py - Python package with methods to compute RH
+                          distance of ccdhs
+       -calculate_distance.py - python script to take HHT output and
+                                create pandas DataFrame
+       -old_utility.py - python package to aid calculate_distance.py
+       -ChungLu.py - python script to generate graph streams
